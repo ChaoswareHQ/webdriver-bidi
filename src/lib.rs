@@ -9,7 +9,7 @@ use serde_json::Value as JsonValue;
 pub use bidi_protocol_macros::{BidiBuilder, BidiCommand, BidiEvent};
 
 /// A typed BiDi command: pairs a wire `method` with its result type.
-pub trait BidiCommand {
+pub trait BidiCommand: Serialize {
     const METHOD: &'static str;
     type Response: for<'de> Deserialize<'de>;
 }
