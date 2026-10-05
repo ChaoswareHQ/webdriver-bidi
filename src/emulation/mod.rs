@@ -23,7 +23,7 @@ pub struct GeolocationCoordinates {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accuracy: Option<JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub altitude: Option<JsonValue>,
+    pub altitude: Option<f64>,
     #[serde(rename = "altitudeAccuracy", skip_serializing_if = "Option::is_none")]
     pub altitude_accuracy: Option<JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -45,63 +45,63 @@ pub struct GeolocationPositionError {
 #[serde(rename_all = "camelCase")]
 pub struct MediaFeatures {
     #[serde(rename = "any-hover", skip_serializing_if = "Option::is_none")]
-    pub any_hover: Option<JsonValue>,
+    pub any_hover: Option<MediaFeaturesAnyHover>,
     #[serde(rename = "any-pointer", skip_serializing_if = "Option::is_none")]
-    pub any_pointer: Option<JsonValue>,
+    pub any_pointer: Option<MediaFeaturesAnyPointer>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub color: Option<JsonValue>,
+    pub color: Option<u64>,
     #[serde(rename = "color-gamut", skip_serializing_if = "Option::is_none")]
-    pub color_gamut: Option<JsonValue>,
+    pub color_gamut: Option<MediaFeaturesColorGamut>,
     #[serde(rename = "color-index", skip_serializing_if = "Option::is_none")]
-    pub color_index: Option<JsonValue>,
+    pub color_index: Option<u64>,
     #[serde(rename = "display-mode", skip_serializing_if = "Option::is_none")]
-    pub display_mode: Option<JsonValue>,
+    pub display_mode: Option<MediaFeaturesDisplayMode>,
     #[serde(rename = "dynamic-range", skip_serializing_if = "Option::is_none")]
-    pub dynamic_range: Option<JsonValue>,
+    pub dynamic_range: Option<MediaFeaturesDynamicRange>,
     #[serde(rename = "environment-blending", skip_serializing_if = "Option::is_none")]
-    pub environment_blending: Option<JsonValue>,
+    pub environment_blending: Option<MediaFeaturesEnvironmentBlending>,
     #[serde(rename = "forced-colors", skip_serializing_if = "Option::is_none")]
-    pub forced_colors: Option<JsonValue>,
+    pub forced_colors: Option<MediaFeaturesForcedColors>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grid: Option<JsonValue>,
     #[serde(rename = "horizontal-viewport-segments", skip_serializing_if = "Option::is_none")]
-    pub horizontal_viewport_segments: Option<JsonValue>,
+    pub horizontal_viewport_segments: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hover: Option<JsonValue>,
+    pub hover: Option<MediaFeaturesHover>,
     #[serde(rename = "inverted-colors", skip_serializing_if = "Option::is_none")]
-    pub inverted_colors: Option<JsonValue>,
+    pub inverted_colors: Option<MediaFeaturesInvertedColors>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub monochrome: Option<JsonValue>,
+    pub monochrome: Option<u64>,
     #[serde(rename = "nav-controls", skip_serializing_if = "Option::is_none")]
-    pub nav_controls: Option<JsonValue>,
+    pub nav_controls: Option<MediaFeaturesNavControls>,
     #[serde(rename = "overflow-block", skip_serializing_if = "Option::is_none")]
-    pub overflow_block: Option<JsonValue>,
+    pub overflow_block: Option<MediaFeaturesOverflowBlock>,
     #[serde(rename = "overflow-inline", skip_serializing_if = "Option::is_none")]
-    pub overflow_inline: Option<JsonValue>,
+    pub overflow_inline: Option<MediaFeaturesOverflowInline>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub pointer: Option<JsonValue>,
+    pub pointer: Option<MediaFeaturesPointer>,
     #[serde(rename = "prefers-color-scheme", skip_serializing_if = "Option::is_none")]
-    pub prefers_color_scheme: Option<JsonValue>,
+    pub prefers_color_scheme: Option<MediaFeaturesPrefersColorScheme>,
     #[serde(rename = "prefers-contrast", skip_serializing_if = "Option::is_none")]
-    pub prefers_contrast: Option<JsonValue>,
+    pub prefers_contrast: Option<MediaFeaturesPrefersContrast>,
     #[serde(rename = "prefers-reduced-data", skip_serializing_if = "Option::is_none")]
-    pub prefers_reduced_data: Option<JsonValue>,
+    pub prefers_reduced_data: Option<MediaFeaturesPrefersReducedData>,
     #[serde(rename = "prefers-reduced-motion", skip_serializing_if = "Option::is_none")]
-    pub prefers_reduced_motion: Option<JsonValue>,
+    pub prefers_reduced_motion: Option<MediaFeaturesPrefersReducedMotion>,
     #[serde(rename = "prefers-reduced-transparency", skip_serializing_if = "Option::is_none")]
-    pub prefers_reduced_transparency: Option<JsonValue>,
+    pub prefers_reduced_transparency: Option<MediaFeaturesPrefersReducedTransparency>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub scan: Option<JsonValue>,
+    pub scan: Option<MediaFeaturesScan>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub scripting: Option<JsonValue>,
+    pub scripting: Option<MediaFeaturesScripting>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update: Option<JsonValue>,
+    pub update: Option<MediaFeaturesUpdate>,
     #[serde(rename = "vertical-viewport-segments", skip_serializing_if = "Option::is_none")]
-    pub vertical_viewport_segments: Option<JsonValue>,
+    pub vertical_viewport_segments: Option<u64>,
     #[serde(rename = "video-color-gamut", skip_serializing_if = "Option::is_none")]
-    pub video_color_gamut: Option<JsonValue>,
+    pub video_color_gamut: Option<MediaFeaturesVideoColorGamut>,
     #[serde(rename = "video-dynamic-range", skip_serializing_if = "Option::is_none")]
-    pub video_dynamic_range: Option<JsonValue>,
+    pub video_dynamic_range: Option<MediaFeaturesVideoDynamicRange>,
 }
 
 /// `emulation.NetworkConditions`
@@ -159,7 +159,8 @@ pub enum ScreenOrientationType {
 #[bidi(method = "emulation.setForcedColorsModeThemeOverride", response = "SetForcedColorsModeThemeOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetForcedColorsModeThemeOverrideParameters {
-    pub theme: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub theme: Option<crate::emulation::ForcedColorsModeTheme>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -188,7 +189,8 @@ pub type SetGeolocationOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setLocaleOverride", response = "SetLocaleOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetLocaleOverrideParameters {
-    pub locale: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -203,7 +205,8 @@ pub type SetLocaleOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setMediaFeaturesOverride", response = "SetMediaFeaturesOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetMediaFeaturesOverrideParameters {
-    pub features: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub features: Option<crate::emulation::MediaFeatures>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -218,8 +221,8 @@ pub type SetMediaFeaturesOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setNetworkConditions", response = "SetNetworkConditionsResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetNetworkConditionsParameters {
-    #[serde(rename = "networkConditions")]
-    pub network_conditions: JsonValue,
+    #[serde(rename = "networkConditions", skip_serializing_if = "Option::is_none")]
+    pub network_conditions: Option<crate::emulation::NetworkConditions>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -234,8 +237,8 @@ pub type SetNetworkConditionsResult = crate::EmptyResult;
 #[bidi(method = "emulation.setScreenOrientationOverride", response = "SetScreenOrientationOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetScreenOrientationOverrideParameters {
-    #[serde(rename = "screenOrientation")]
-    pub screen_orientation: JsonValue,
+    #[serde(rename = "screenOrientation", skip_serializing_if = "Option::is_none")]
+    pub screen_orientation: Option<crate::emulation::ScreenOrientation>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -250,8 +253,8 @@ pub type SetScreenOrientationOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setScreenSettingsOverride", response = "SetScreenSettingsOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetScreenSettingsOverrideParameters {
-    #[serde(rename = "screenArea")]
-    pub screen_area: JsonValue,
+    #[serde(rename = "screenArea", skip_serializing_if = "Option::is_none")]
+    pub screen_area: Option<crate::emulation::ScreenArea>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -266,7 +269,8 @@ pub type SetScreenSettingsOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setScriptingEnabled", response = "SetScriptingEnabledResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetScriptingEnabledParameters {
-    pub enabled: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -282,7 +286,7 @@ pub type SetScriptingEnabledResult = crate::EmptyResult;
 #[serde(rename_all = "camelCase")]
 pub struct SetScrollbarTypeOverrideParameters {
     #[serde(rename = "scrollbarType")]
-    pub scrollbar_type: JsonValue,
+    pub scrollbar_type: SetScrollbarTypeOverrideParametersScrollbarType,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -297,8 +301,8 @@ pub type SetScrollbarTypeOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setTextLayoutModeOverride", response = "SetTextLayoutModeOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetTextLayoutModeOverrideParameters {
-    #[serde(rename = "textLayoutMode")]
-    pub text_layout_mode: JsonValue,
+    #[serde(rename = "textLayoutMode", skip_serializing_if = "Option::is_none")]
+    pub text_layout_mode: Option<crate::emulation::TextLayoutMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -313,7 +317,8 @@ pub type SetTextLayoutModeOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setTimezoneOverride", response = "SetTimezoneOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetTimezoneOverrideParameters {
-    pub timezone: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -328,8 +333,8 @@ pub type SetTimezoneOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setTouchOverride", response = "SetTouchOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetTouchOverrideParameters {
-    #[serde(rename = "maxTouchPoints")]
-    pub max_touch_points: JsonValue,
+    #[serde(rename = "maxTouchPoints", skip_serializing_if = "Option::is_none")]
+    pub max_touch_points: Option<JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -344,8 +349,8 @@ pub type SetTouchOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setUserAgentOverride", response = "SetUserAgentOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetUserAgentOverrideParameters {
-    #[serde(rename = "userAgent")]
-    pub user_agent: JsonValue,
+    #[serde(rename = "userAgent", skip_serializing_if = "Option::is_none")]
+    pub user_agent: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -360,8 +365,8 @@ pub type SetUserAgentOverrideResult = crate::EmptyResult;
 #[bidi(method = "emulation.setViewportMetaOverride", response = "SetViewportMetaOverrideResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetViewportMetaOverrideParameters {
-    #[serde(rename = "viewportMeta")]
-    pub viewport_meta: JsonValue,
+    #[serde(rename = "viewportMeta", skip_serializing_if = "Option::is_none")]
+    pub viewport_meta: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -376,5 +381,297 @@ pub type SetViewportMetaOverrideResult = crate::EmptyResult;
 pub enum TextLayoutMode {
     #[serde(rename = "mobile")]
     Mobile,
+}
+
+/// `MediaFeaturesAnyHover` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesAnyHover {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "hover")]
+    Hover,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesAnyPointer` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesAnyPointer {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "coarse")]
+    Coarse,
+    #[serde(rename = "fine")]
+    Fine,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesColorGamut` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesColorGamut {
+    #[serde(rename = "srgb")]
+    Srgb,
+    #[serde(rename = "p3")]
+    P3,
+    #[serde(rename = "rec2020")]
+    Rec2020,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesDisplayMode` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesDisplayMode {
+    #[serde(rename = "fullscreen")]
+    Fullscreen,
+    #[serde(rename = "standalone")]
+    Standalone,
+    #[serde(rename = "minimal-ui")]
+    MinimalUi,
+    #[serde(rename = "browser")]
+    Browser,
+    #[serde(rename = "picture-in-picture")]
+    PictureInPicture,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesDynamicRange` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesDynamicRange {
+    #[serde(rename = "standard")]
+    Standard,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesEnvironmentBlending` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesEnvironmentBlending {
+    #[serde(rename = "opaque")]
+    Opaque,
+    #[serde(rename = "additive")]
+    Additive,
+    #[serde(rename = "subtractive")]
+    Subtractive,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesForcedColors` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesForcedColors {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesHover` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesHover {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "hover")]
+    Hover,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesInvertedColors` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesInvertedColors {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "inverted")]
+    Inverted,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesNavControls` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesNavControls {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "back")]
+    Back,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesOverflowBlock` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesOverflowBlock {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "scroll")]
+    Scroll,
+    #[serde(rename = "optional-paged")]
+    OptionalPaged,
+    #[serde(rename = "paged")]
+    Paged,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesOverflowInline` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesOverflowInline {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "scroll")]
+    Scroll,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPointer` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPointer {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "coarse")]
+    Coarse,
+    #[serde(rename = "fine")]
+    Fine,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPrefersColorScheme` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPrefersColorScheme {
+    #[serde(rename = "light")]
+    Light,
+    #[serde(rename = "dark")]
+    Dark,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPrefersContrast` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPrefersContrast {
+    #[serde(rename = "no-preference")]
+    NoPreference,
+    #[serde(rename = "more")]
+    More,
+    #[serde(rename = "less")]
+    Less,
+    #[serde(rename = "custom")]
+    Custom,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPrefersReducedData` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPrefersReducedData {
+    #[serde(rename = "no-preference")]
+    NoPreference,
+    #[serde(rename = "reduce")]
+    Reduce,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPrefersReducedMotion` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPrefersReducedMotion {
+    #[serde(rename = "no-preference")]
+    NoPreference,
+    #[serde(rename = "reduce")]
+    Reduce,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesPrefersReducedTransparency` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesPrefersReducedTransparency {
+    #[serde(rename = "no-preference")]
+    NoPreference,
+    #[serde(rename = "reduce")]
+    Reduce,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesScan` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesScan {
+    #[serde(rename = "interlace")]
+    Interlace,
+    #[serde(rename = "progressive")]
+    Progressive,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesScripting` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesScripting {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "initial-only")]
+    InitialOnly,
+    #[serde(rename = "enabled")]
+    Enabled,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesUpdate` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesUpdate {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "slow")]
+    Slow,
+    #[serde(rename = "fast")]
+    Fast,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesVideoColorGamut` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesVideoColorGamut {
+    #[serde(rename = "srgb")]
+    Srgb,
+    #[serde(rename = "p3")]
+    P3,
+    #[serde(rename = "rec2020")]
+    Rec2020,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `MediaFeaturesVideoDynamicRange` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum MediaFeaturesVideoDynamicRange {
+    #[serde(rename = "standard")]
+    Standard,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "null")]
+    Null,
+}
+
+/// `SetScrollbarTypeOverrideParametersScrollbarType` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SetScrollbarTypeOverrideParametersScrollbarType {
+    #[serde(rename = "classic")]
+    Classic,
+    #[serde(rename = "overlay")]
+    Overlay,
+    #[serde(rename = "null")]
+    Null,
 }
 

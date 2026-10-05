@@ -90,10 +90,13 @@ python scripts/publish.py            # webdriver-bidi-macros, then webdriver-bid
 python scripts/publish.py --dry-run
 ```
 
-## Known gaps (first cut)
+## Notes
 
-* Inline anonymous maps/unions inside a field are emitted as `serde_json::Value`
-  rather than synthesised structs.
-* Group unions with a string discriminant are emitted as `#[serde(untagged)]`
-  enums; tagged dispatch is a later refinement.
+* Nullable unions (`X / null`) become `Option<X>`.
+* Inline anonymous maps and string-literal unions inside a field are emitted as
+  named, synthesized types (e.g. `AccessibilityLocatorValue`,
+  `InnerTextLocatorMatchType`).
+* Discriminated unions (`Locator`, `ClipRectangle`, `ProxyConfiguration`) are
+  `#[serde(untagged)]` enums resolved by shape.
+* Recursive types are boxed to keep them sized.
 * `js-uint` maps to `u64` and `text` to `String` (owned, not `Cow`).

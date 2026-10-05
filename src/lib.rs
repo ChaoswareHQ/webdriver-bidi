@@ -51,6 +51,14 @@ pub struct ErrorResponse {
     pub stacktrace: Option<String>,
 }
 
+/// A reply that is either a typed success or an error.
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum Reply<T> {
+    Ok(SuccessResponse<T>),
+    Err(ErrorResponse),
+}
+
 /// The `{}` result returned by commands with no typed result.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct EmptyResult {}

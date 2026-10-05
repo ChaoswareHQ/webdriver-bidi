@@ -16,7 +16,7 @@ pub struct ClientWindowInfo {
     #[serde(rename = "clientWindow")]
     pub client_window: crate::browser::ClientWindow,
     pub height: u64,
-    pub state: JsonValue,
+    pub state: ClientWindowInfoState,
     pub width: u64,
     pub x: i64,
     pub y: i64,
@@ -26,7 +26,7 @@ pub struct ClientWindowInfo {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
 #[serde(rename_all = "camelCase")]
 pub struct ClientWindowNamedState {
-    pub state: JsonValue,
+    pub state: ClientWindowNamedStateState,
 }
 
 /// `browser.ClientWindowRectState`
@@ -132,8 +132,8 @@ pub type SetClientWindowStateResult = crate::browser::ClientWindowInfo;
 #[bidi(method = "browser.setDownloadBehavior", response = "SetDownloadBehaviorResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetDownloadBehaviorParameters {
-    #[serde(rename = "downloadBehavior")]
-    pub download_behavior: JsonValue,
+    #[serde(rename = "downloadBehavior", skip_serializing_if = "Option::is_none")]
+    pub download_behavior: Option<crate::browser::DownloadBehavior>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
     pub user_contexts: Option<Vec<crate::browser::UserContext>>,
 }
@@ -169,4 +169,28 @@ pub struct GetClientWindowsParameters {}
 #[bidi(method = "browser.getUserContexts", response = "GetUserContextsResult")]
 #[serde(rename_all = "camelCase")]
 pub struct GetUserContextsParameters {}
+
+/// `ClientWindowInfoState` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ClientWindowInfoState {
+    #[serde(rename = "fullscreen")]
+    Fullscreen,
+    #[serde(rename = "maximized")]
+    Maximized,
+    #[serde(rename = "minimized")]
+    Minimized,
+    #[serde(rename = "normal")]
+    Normal,
+}
+
+/// `ClientWindowNamedStateState` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ClientWindowNamedStateState {
+    #[serde(rename = "fullscreen")]
+    Fullscreen,
+    #[serde(rename = "maximized")]
+    Maximized,
+    #[serde(rename = "minimized")]
+    Minimized,
+}
 

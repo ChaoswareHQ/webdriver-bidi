@@ -88,16 +88,18 @@ pub struct Base64Value {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
 #[serde(rename_all = "camelCase")]
 pub struct BaseParameters {
-    pub context: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<crate::browsing_context::BrowsingContext>,
     #[serde(rename = "isBlocked")]
     pub is_blocked: bool,
-    pub navigation: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub navigation: Option<crate::browsing_context::Navigation>,
     #[serde(rename = "redirectCount")]
     pub redirect_count: u64,
     pub request: crate::network::RequestData,
     pub timestamp: u64,
     #[serde(rename = "userContext", skip_serializing_if = "Option::is_none")]
-    pub user_context: Option<JsonValue>,
+    pub user_context: Option<crate::browser::UserContext>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub intercepts: Option<Vec<crate::network::Intercept>>,
 }
@@ -184,7 +186,7 @@ pub struct ContinueWithAuthCredentials {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
 #[serde(rename_all = "camelCase")]
 pub struct ContinueWithAuthNoCredentials {
-    pub action: JsonValue,
+    pub action: ContinueWithAuthNoCredentialsAction,
 }
 
 /// `network.ContinueWithAuthParameters`
@@ -342,7 +344,7 @@ pub struct Initiator {
     #[serde(rename = "stackTrace", skip_serializing_if = "Option::is_none")]
     pub stack_trace: Option<crate::script::StackTrace>,
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub type_: Option<JsonValue>,
+    pub type_: Option<InitiatorType>,
 }
 
 /// `network.Intercept`
@@ -416,11 +418,11 @@ pub struct RequestData {
     pub cookies: Vec<crate::network::Cookie>,
     #[serde(rename = "headersSize")]
     pub headers_size: u64,
-    #[serde(rename = "bodySize")]
-    pub body_size: JsonValue,
+    #[serde(rename = "bodySize", skip_serializing_if = "Option::is_none")]
+    pub body_size: Option<u64>,
     pub destination: String,
-    #[serde(rename = "initiatorType")]
-    pub initiator_type: JsonValue,
+    #[serde(rename = "initiatorType", skip_serializing_if = "Option::is_none")]
+    pub initiator_type: Option<String>,
     pub timings: crate::network::FetchTimingInfo,
 }
 
@@ -456,10 +458,10 @@ pub struct ResponseData {
     pub mime_type: String,
     #[serde(rename = "bytesReceived")]
     pub bytes_received: u64,
-    #[serde(rename = "headersSize")]
-    pub headers_size: JsonValue,
-    #[serde(rename = "bodySize")]
-    pub body_size: JsonValue,
+    #[serde(rename = "headersSize", skip_serializing_if = "Option::is_none")]
+    pub headers_size: Option<u64>,
+    #[serde(rename = "bodySize", skip_serializing_if = "Option::is_none")]
+    pub body_size: Option<u64>,
     pub content: crate::network::ResponseContent,
     #[serde(rename = "authChallenges", skip_serializing_if = "Option::is_none")]
     pub auth_challenges: Option<Vec<crate::network::AuthChallenge>>,
@@ -493,7 +495,7 @@ pub enum SameSite {
 #[serde(rename_all = "camelCase")]
 pub struct SetCacheBehaviorParameters {
     #[serde(rename = "cacheBehavior")]
-    pub cache_behavior: JsonValue,
+    pub cache_behavior: SetCacheBehaviorParametersCacheBehavior,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
 }
@@ -589,5 +591,36 @@ pub struct UrlPatternString {
 pub struct AuthRequired {
     #[serde(flatten)]
     pub params: crate::network::AuthRequiredParameters,
+}
+
+/// `ContinueWithAuthNoCredentialsAction` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ContinueWithAuthNoCredentialsAction {
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "cancel")]
+    Cancel,
+}
+
+/// `InitiatorType` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum InitiatorType {
+    #[serde(rename = "parser")]
+    Parser,
+    #[serde(rename = "script")]
+    Script,
+    #[serde(rename = "preflight")]
+    Preflight,
+    #[serde(rename = "other")]
+    Other,
+}
+
+/// `SetCacheBehaviorParametersCacheBehavior` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SetCacheBehaviorParametersCacheBehavior {
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "bypass")]
+    Bypass,
 }
 

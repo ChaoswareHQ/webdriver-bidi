@@ -47,7 +47,7 @@ pub struct ArrayBufferRemoteValue {
 pub struct ArrayLocalValue {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: crate::script::ListLocalValue,
+    pub value: Box<crate::script::ListLocalValue>,
 }
 
 /// `script.ArrayRemoteValue`
@@ -61,7 +61,7 @@ pub struct ArrayRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::ListRemoteValue>,
+    pub value: Option<Box<crate::script::ListRemoteValue>>,
 }
 
 /// `script.AudioWorkletRealmInfo`
@@ -326,7 +326,7 @@ pub struct HTMLCollectionRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::ListRemoteValue>,
+    pub value: Option<Box<crate::script::ListRemoteValue>>,
 }
 
 /// `script.Handle`
@@ -360,7 +360,7 @@ pub enum LocalValue {
 pub struct MapLocalValue {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: crate::script::MappingLocalValue,
+    pub value: Box<crate::script::MappingLocalValue>,
 }
 
 /// `script.MapRemoteValue`
@@ -374,7 +374,7 @@ pub struct MapRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::MappingRemoteValue>,
+    pub value: Option<Box<crate::script::MappingRemoteValue>>,
 }
 
 /// `script.MappingLocalValue`
@@ -403,7 +403,7 @@ pub struct NodeListRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::ListRemoteValue>,
+    pub value: Option<Box<crate::script::ListRemoteValue>>,
 }
 
 /// `script.NodeProperties`
@@ -415,19 +415,19 @@ pub struct NodeProperties {
     #[serde(rename = "childNodeCount")]
     pub child_node_count: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub attributes: Option<JsonValue>,
+    pub attributes: Option<NodePropertiesAttributes>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub children: Option<Vec<crate::script::NodeRemoteValue>>,
     #[serde(rename = "localName", skip_serializing_if = "Option::is_none")]
     pub local_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mode: Option<JsonValue>,
+    pub mode: Option<NodePropertiesMode>,
     #[serde(rename = "namespaceURI", skip_serializing_if = "Option::is_none")]
     pub namespace_uri: Option<String>,
     #[serde(rename = "nodeValue", skip_serializing_if = "Option::is_none")]
     pub node_value: Option<String>,
     #[serde(rename = "shadowRoot", skip_serializing_if = "Option::is_none")]
-    pub shadow_root: Option<JsonValue>,
+    pub shadow_root: Option<Box<crate::script::NodeRemoteValue>>,
 }
 
 /// `script.NodeRemoteValue`
@@ -443,7 +443,7 @@ pub struct NodeRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::NodeProperties>,
+    pub value: Option<Box<crate::script::NodeProperties>>,
 }
 
 /// `script.NullValue`
@@ -469,7 +469,7 @@ pub struct NumberValue {
 pub struct ObjectLocalValue {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: crate::script::MappingLocalValue,
+    pub value: Box<crate::script::MappingLocalValue>,
 }
 
 /// `script.ObjectRemoteValue`
@@ -483,7 +483,7 @@ pub struct ObjectRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::MappingRemoteValue>,
+    pub value: Option<Box<crate::script::MappingRemoteValue>>,
 }
 
 /// `script.PaintWorkletRealmInfo`
@@ -709,7 +709,7 @@ pub struct ServiceWorkerRealmInfo {
 pub struct SetLocalValue {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: crate::script::ListLocalValue,
+    pub value: Box<crate::script::ListLocalValue>,
 }
 
 /// `script.SetRemoteValue`
@@ -723,7 +723,7 @@ pub struct SetRemoteValue {
     #[serde(rename = "internalId", skip_serializing_if = "Option::is_none")]
     pub internal_id: Option<crate::script::InternalId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<crate::script::ListRemoteValue>,
+    pub value: Option<Box<crate::script::ListRemoteValue>>,
 }
 
 /// `script.SharedId`
@@ -938,5 +938,20 @@ pub struct RealmCreated {
 pub struct RealmDestroyed {
     #[serde(flatten)]
     pub params: crate::script::RealmDestroyedParameters,
+}
+
+/// `NodePropertiesAttributes` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
+#[serde(rename_all = "camelCase")]
+pub struct NodePropertiesAttributes {
+}
+
+/// `NodePropertiesMode` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum NodePropertiesMode {
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "closed")]
+    Closed,
 }
 

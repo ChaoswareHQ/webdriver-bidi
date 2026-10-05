@@ -122,6 +122,14 @@ pub struct ErrorResponse {
     pub stacktrace: Option<String>,
 }
 
+/// A reply that is either a typed success or an error.
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum Reply<T> {
+    Ok(SuccessResponse<T>),
+    Err(ErrorResponse),
+}
+
 /// The `{}` result returned by commands with no typed result.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct EmptyResult {}
@@ -387,6 +395,32 @@ def collect_refs(node: dict) -> list[dict]:
     return []
 
 
+def nullable_inner(node: dict) -> dict | None:
+    """`X / null` -> X, so the field becomes `Option<X>`."""
+    if node.get("kind") != "union":
+        return None
+    members = node["members"]
+    non_null = [m for m in members if not (m.get("kind") == "literal" and m.get("value") == "null")]
+    nulls = [m for m in members if m.get("kind") == "literal" and m.get("value") == "null"]
+    if nulls and len(non_null) == 1:
+        return non_null[0]
+    return None
+
+
+def collect_ref_names(value) -> set[str]:
+    """Every reference name appearing anywhere inside a node."""
+    names: set[str] = set()
+    if isinstance(value, dict):
+        if value.get("kind") == "ref":
+            names.add(value["name"])
+        for child in value.values():
+            names |= collect_ref_names(child)
+    elif isinstance(value, list):
+        for child in value:
+            names |= collect_ref_names(child)
+    return names
+
+
 def split_definitions(cddl: str) -> list[tuple[str, str]]:
     """Split `all.cddl` into ``(name, rhs)`` pairs (definitions start at col 0)."""
     defs: list[tuple[str, str]] = []
@@ -459,6 +493,31 @@ class Generator:
         self.defs = defs
         self.commands = set()   # dotted names that are commands
         self.events = set()     # dotted names that are events
+        self.synthetic: list[tuple[str, dict, str]] = []  # inline types to emit
+        self.synth_names: set[str] = set()
+        self.current_module: str = ""
+        self.current_def: str | None = None
+        self.ref_graph: dict[str, set[str]] = {}
+
+    def build_graph(self) -> None:
+        for name, node in self.defs.items():
+            self.ref_graph[name] = collect_ref_names(node)
+
+    def reaches(self, start: str, target: str | None) -> bool:
+        """Whether `start` transitively references `target` (cycle detection)."""
+        if target is None:
+            return False
+        seen: set[str] = set()
+        stack = [start]
+        while stack:
+            current = stack.pop()
+            if current == target:
+                return True
+            if current in seen:
+                continue
+            seen.add(current)
+            stack.extend(self.ref_graph.get(current, ()))
+        return False
 
     # -- reference resolution ------------------------------------------------
     def map_ref(self, name: str) -> str | None:
@@ -474,11 +533,12 @@ class Generator:
         return None
 
     def rust_type(self, node: dict) -> str:
+        """Best-effort Rust type where no named synthesis is required."""
         kind = node["kind"]
         if kind == "prim":
             return PRIMS[node["name"]]
         if kind == "literal":
-            return "String"
+            return "bool" if node["value"] in ("true", "false") else "String"
         if kind == "number":
             return "f64" if "." in node["value"] else "i64"
         if kind == "range":
@@ -487,31 +547,81 @@ class Generator:
             mapped = self.map_ref(node["name"])
             return mapped if mapped else "JsonValue"
         if kind == "array":
-            inner = self.array_element(node)
-            return f"Vec<{inner}>" if inner else "Vec<JsonValue>"
-        # Inline maps, groups and unions collapse to a permissive JSON value.
+            element = self.array_element_node(node)
+            return f"Vec<{self.rust_type(element)}>" if element else "Vec<JsonValue>"
+        # Inline maps/groups/unions are handled by `resolve_type`.
         return "JsonValue"
 
-    def array_element(self, node: dict) -> str | None:
+    # -- inline type synthesis ----------------------------------------------
+    def synth(self, base: str, node: dict) -> str:
+        """Register an inline (anonymous) type and return its generated name."""
+        name = base
+        counter = 2
+        while name in self.defs or name in self.synth_names:
+            name = f"{base}{counter}"
+            counter += 1
+        self.synth_names.add(name)
+        self.synthetic.append((name, node, self.current_module))
+        return name
+
+    def resolve_type(self, node: dict, base: str) -> tuple[str, bool]:
+        """Return `(rust_type, optional)` for a value, synthesising inline types."""
+        inner = nullable_inner(node)
+        optional = inner is not None
+        if inner is not None:
+            node = inner
+
+        kind = node["kind"]
+        if kind == "union":
+            members = node["members"]
+            if all(m["kind"] == "literal" for m in members):
+                return self.synth(base, node), optional
+            if all(m["kind"] == "ref" for m in members):
+                return self.synth(base, node), optional
+            return "JsonValue", optional
+        if kind == "map":
+            return self.synth(base, node), optional
+        if kind == "group":
+            keyed = any(m.get("key") is not None for m in node.get("members", []) if not m.get("drop"))
+            if keyed:
+                return self.synth(base, node), optional
+            refs = collect_refs(node)
+            if refs:
+                return self.synth(base, {"kind": "union", "members": refs}), optional
+            return "JsonValue", optional
+        if kind == "array":
+            element = self.array_element_node(node)
+            if element is None:
+                return "Vec<JsonValue>", optional
+            element_ty, _ = self.resolve_type(element, base + "Item")
+            return f"Vec<{element_ty}>", optional
+        return self.rust_type(node), optional
+
+    def array_element_node(self, node: dict) -> dict | None:
         if len(node["members"]) != 1:
             return None
         member = node["members"][0]
         if member.get("drop"):
             return None
-        return self.rust_type(member["value"])
+        return member["value"]
 
     # -- definition emission -------------------------------------------------
-    def field(self, member: dict) -> str | None:
+    def field(self, member: dict, parent: str) -> str | None:
         if member.get("drop") or member["key"] is None:
             return None
-        value = member["value"]
-        rust = self.rust_type(value)
-        if member["optional"]:
+        base = f"{parent}{to_upper_camel(member['key'])}"
+        rust, optional = self.resolve_type(member["value"], base)
+        inner = nullable_inner(member["value"])
+        target = inner if inner is not None else member["value"]
+        if target.get("kind") == "ref" and self.reaches(target["name"], self.current_def):
+            rust = f"Box<{rust}>"
+        optional = optional or member["optional"]
+        if optional:
             rust = f"Option<{rust}>"
         attrs = []
         if member["key"] != to_snake(member["key"]):
             attrs.append(f'rename = "{member["key"]}"')
-        if member["optional"]:
+        if optional:
             attrs.append('skip_serializing_if = "Option::is_none"')
         attr = f"    #[serde({', '.join(attrs)})]\n" if attrs else ""
         return f"{attr}    pub {to_snake(member['key'])}: {rust},"
@@ -544,7 +654,7 @@ class Generator:
                 lines.append("    #[serde(flatten)]")
                 lines.append(f"    pub {field_name}: {inner},")
                 continue
-            rendered = self.field(member)
+            rendered = self.field(member, name)
             if rendered:
                 lines.append(rendered)
         lines.append("}")
@@ -583,6 +693,10 @@ class Generator:
         return [f"pub type {name} = {self.rust_type(node)};"]
 
     def classify(self, name: str, node: dict, command_attr=None) -> list[str]:
+        inner = nullable_inner(node)
+        if inner is not None:
+            ty, _ = self.resolve_type(inner, name)
+            return [f"pub type {name} = Option<{ty}>;"]
         members = node.get("members")
         if node["kind"] == "map" and members is not None:
             real = [m for m in members if not m.get("drop")]
@@ -705,6 +819,8 @@ def is_dispatch_union(name: str, node: dict) -> bool:
 
 def derivable(node: dict) -> bool:
     """Whether a definition maps to a struct/enum a derive can attach to."""
+    if nullable_inner(node) is not None:
+        return False
     kind = node.get("kind")
     if kind in ("map", "union", "literal"):
         return True
@@ -728,6 +844,7 @@ def generate(cddl: str) -> None:
 
     gen = Generator(defs)
     gen.discover()
+    gen.build_graph()
 
     # Attach each command's `#[bidi(method, response)]` to its params type; where
     # the params are `EmptyParams` (or absent) synthesise a dedicated struct.
@@ -759,6 +876,8 @@ def generate(cddl: str) -> None:
         attr = command_attrs.get(name)
         if attr and not derivable(node):
             attr = None
+        gen.current_module = module_ident(module_of(name)) if module_of(name) else ""
+        gen.current_def = name
         try:
             emitted = gen.classify(type_leaf(name), node, attr)
         except Exception as error:  # noqa: BLE001
@@ -787,6 +906,16 @@ def generate(cddl: str) -> None:
         module = module_ident(module_of(dotted)) or "root"
         bucket = root if module == "root" else modules.setdefault(module, [])
         bucket.extend(gen.emit_event_struct(dotted))
+        bucket.append("")
+
+    # Types synthesized from inline anonymous maps/unions (emitted until closed).
+    gen.current_module = ""
+    while gen.synthetic:
+        synth_name, synth_node, synth_module = gen.synthetic.pop(0)
+        gen.current_module = synth_module
+        bucket = modules.setdefault(synth_module, []) if synth_module else root
+        bucket.append(f"/// `{synth_name}` (synthesized from an inline type)")
+        bucket.extend(gen.classify(synth_name, synth_node))
         bucket.append("")
 
     os.makedirs(SRC, exist_ok=True)

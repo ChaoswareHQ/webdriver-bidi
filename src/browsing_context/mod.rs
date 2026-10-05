@@ -11,7 +11,7 @@ use crate::{BidiBuilder, BidiCommand, BidiEvent};
 pub struct AccessibilityLocator {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: JsonValue,
+    pub value: AccessibilityLocatorValue,
 }
 
 /// `browsingContext.ActivateParameters`
@@ -29,17 +29,18 @@ pub type ActivateResult = crate::EmptyResult;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
 #[serde(rename_all = "camelCase")]
 pub struct BaseInfo {
-    pub children: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub children: Option<Box<crate::browsing_context::InfoList>>,
     #[serde(rename = "clientWindow")]
     pub client_window: crate::browser::ClientWindow,
     pub context: crate::browsing_context::BrowsingContext,
-    #[serde(rename = "originalOpener")]
-    pub original_opener: JsonValue,
+    #[serde(rename = "originalOpener", skip_serializing_if = "Option::is_none")]
+    pub original_opener: Option<crate::browsing_context::BrowsingContext>,
     pub url: String,
     #[serde(rename = "userContext")]
     pub user_context: crate::browser::UserContext,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parent: Option<JsonValue>,
+    pub parent: Option<crate::browsing_context::BrowsingContext>,
 }
 
 /// `browsingContext.BaseNavigationInfo`
@@ -47,7 +48,8 @@ pub struct BaseInfo {
 #[serde(rename_all = "camelCase")]
 pub struct BaseNavigationInfo {
     pub context: crate::browsing_context::BrowsingContext,
-    pub navigation: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub navigation: Option<crate::browsing_context::Navigation>,
     pub timestamp: u64,
     pub url: String,
     #[serde(rename = "userContext", skip_serializing_if = "Option::is_none")]
@@ -129,7 +131,7 @@ pub struct ContextCreatedParameters {
 pub struct ContextLocator {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: JsonValue,
+    pub value: ContextLocatorValue,
 }
 
 /// `browsingContext.CreateParameters`
@@ -193,7 +195,8 @@ pub struct DownloadCanceledParams {
 pub struct DownloadCompleteParams {
     pub status: String,
     pub download: crate::browsing_context::Download,
-    pub filepath: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filepath: Option<String>,
     #[serde(flatten)]
     pub base_navigation_info: crate::browsing_context::BaseNavigationInfo,
 }
@@ -309,7 +312,7 @@ pub struct InnerTextLocator {
     #[serde(rename = "ignoreCase", skip_serializing_if = "Option::is_none")]
     pub ignore_case: Option<bool>,
     #[serde(rename = "matchType", skip_serializing_if = "Option::is_none")]
-    pub match_type: Option<JsonValue>,
+    pub match_type: Option<InnerTextLocatorMatchType>,
     #[serde(rename = "maxDepth", skip_serializing_if = "Option::is_none")]
     pub max_depth: Option<u64>,
 }
@@ -374,7 +377,8 @@ pub struct NavigateParameters {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
 #[serde(rename_all = "camelCase")]
 pub struct NavigateResult {
-    pub navigation: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub navigation: Option<crate::browsing_context::Navigation>,
     pub url: String,
 }
 
@@ -476,7 +480,8 @@ pub type Screencast = String;
 #[bidi(method = "browsingContext.setBypassCSP", response = "SetBypassCSPResult")]
 #[serde(rename_all = "camelCase")]
 pub struct SetBypassCSPParameters {
-    pub bypass: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bypass: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contexts: Option<Vec<crate::browsing_context::BrowsingContext>>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -494,7 +499,7 @@ pub struct SetViewportParameters {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<crate::browsing_context::BrowsingContext>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub viewport: Option<JsonValue>,
+    pub viewport: Option<crate::browsing_context::Viewport>,
     #[serde(rename = "devicePixelRatio", skip_serializing_if = "Option::is_none")]
     pub device_pixel_ratio: Option<JsonValue>,
     #[serde(rename = "userContexts", skip_serializing_if = "Option::is_none")]
@@ -740,5 +745,31 @@ pub struct UserPromptClosed {
 pub struct UserPromptOpened {
     #[serde(flatten)]
     pub params: crate::browsing_context::UserPromptOpenedParameters,
+}
+
+/// `AccessibilityLocatorValue` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
+#[serde(rename_all = "camelCase")]
+pub struct AccessibilityLocatorValue {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
+}
+
+/// `ContextLocatorValue` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
+#[serde(rename_all = "camelCase")]
+pub struct ContextLocatorValue {
+    pub context: crate::browsing_context::BrowsingContext,
+}
+
+/// `InnerTextLocatorMatchType` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum InnerTextLocatorMatchType {
+    #[serde(rename = "full")]
+    Full,
+    #[serde(rename = "partial")]
+    Partial,
 }
 

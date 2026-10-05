@@ -11,7 +11,8 @@ use crate::{BidiBuilder, BidiCommand, BidiEvent};
 pub struct BaseLogEntry {
     pub level: crate::log::Level,
     pub source: crate::script::Source,
-    pub text: JsonValue,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
     pub timestamp: u64,
     #[serde(rename = "stackTrace", skip_serializing_if = "Option::is_none")]
     pub stack_trace: Option<crate::script::StackTrace>,
