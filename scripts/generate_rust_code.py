@@ -407,6 +407,15 @@ def nullable_inner(node: dict) -> dict | None:
     return None
 
 
+def is_numeric(node: dict) -> bool:
+    """Whether a node is a numeric primitive, literal number or range."""
+    if node.get("kind") in ("number", "range"):
+        return True
+    return node.get("kind") == "prim" and node.get("name") in {
+        "js-uint", "js-int", "int", "uint", "float", "number",
+    }
+
+
 def collect_ref_names(value) -> set[str]:
     """Every reference name appearing anywhere inside a node."""
     names: set[str] = set()
@@ -576,7 +585,7 @@ class Generator:
             members = node["members"]
             if all(m["kind"] == "literal" for m in members):
                 return self.synth(base, node), optional
-            if all(m["kind"] == "ref" for m in members):
+            if all(m["kind"] in ("prim", "ref", "number", "range", "literal") for m in members):
                 return self.synth(base, node), optional
             return "JsonValue", optional
         if kind == "map":
@@ -674,14 +683,26 @@ class Generator:
         lines.append("}")
         return lines
 
-    def emit_untagged_enum(self, name: str, refs: list[dict], command_attr=None) -> list[str]:
+    def variant_name(self, node: dict) -> str:
+        kind = node.get("kind")
+        if kind == "ref":
+            return to_upper_camel(type_leaf(node["name"]))
+        if kind == "prim":
+            return to_upper_camel(node["name"])
+        if kind in ("number", "range"):
+            return "Number"
+        if kind == "literal":
+            return to_upper_camel(node["value"])
+        return "Value"
+
+    def emit_untagged_enum(self, name: str, nodes: list[dict], command_attr=None) -> list[str]:
         lines = self.derives(command_attr, builder=False)
         lines.append("#[serde(untagged)]")
         lines.append(f"pub enum {name} {{")
         seen = set()
-        for ref in refs:
-            rust = self.rust_type(ref)
-            variant = to_upper_camel(type_leaf(ref.get("name", "value")))
+        for node in nodes:
+            rust = self.rust_type(node)
+            variant = self.variant_name(node)
             while variant in seen:
                 variant += "Alt"
             seen.add(variant)
@@ -720,7 +741,7 @@ class Generator:
         if node["kind"] == "union":
             if all(m["kind"] == "literal" for m in node["members"]):
                 return self.emit_string_enum(name, [m["value"] for m in node["members"]], command_attr)
-            if all(m["kind"] == "ref" for m in node["members"]):
+            if all(m["kind"] in ("prim", "ref", "number", "range", "literal") for m in node["members"]):
                 return self.emit_untagged_enum(name, node["members"], command_attr)
             return self.emit_alias(name, node)
         if node["kind"] == "literal":

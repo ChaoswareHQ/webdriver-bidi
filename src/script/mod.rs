@@ -460,7 +460,7 @@ pub struct NullValue {
 pub struct NumberValue {
     #[serde(rename = "type")]
     pub type_: String,
-    pub value: JsonValue,
+    pub value: NumberValueValue,
 }
 
 /// `script.ObjectLocalValue`
@@ -953,5 +953,13 @@ pub enum NodePropertiesMode {
     Open,
     #[serde(rename = "closed")]
     Closed,
+}
+
+/// `NumberValueValue` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+pub enum NumberValueValue {
+    Number(f64),
+    SpecialNumber(crate::script::SpecialNumber),
 }
 

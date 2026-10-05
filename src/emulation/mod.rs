@@ -63,7 +63,7 @@ pub struct MediaFeatures {
     #[serde(rename = "forced-colors", skip_serializing_if = "Option::is_none")]
     pub forced_colors: Option<MediaFeaturesForcedColors>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub grid: Option<JsonValue>,
+    pub grid: Option<MediaFeaturesGrid>,
     #[serde(rename = "horizontal-viewport-segments", skip_serializing_if = "Option::is_none")]
     pub horizontal_viewport_segments: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -470,6 +470,15 @@ pub enum MediaFeaturesForcedColors {
     Active,
     #[serde(rename = "null")]
     Null,
+}
+
+/// `MediaFeaturesGrid` (synthesized from an inline type)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+pub enum MediaFeaturesGrid {
+    Number(i64),
+    NumberAlt(i64),
+    Null(String),
 }
 
 /// `MediaFeaturesHover` (synthesized from an inline type)

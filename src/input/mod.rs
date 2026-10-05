@@ -77,7 +77,13 @@ pub struct NoneSourceActions {
 }
 
 /// `input.Origin`
-pub type Origin = JsonValue;
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+pub enum Origin {
+    Viewport(String),
+    Pointer(String),
+    ElementOrigin(crate::input::ElementOrigin),
+}
 
 /// `input.PauseAction`
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, BidiBuilder)]
