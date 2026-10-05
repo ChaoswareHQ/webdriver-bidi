@@ -1,4 +1,4 @@
-//! Derive macros for `bidi-protocol`.
+//! Derive macros for `webdriver-bidi`.
 //!
 //! Mirrors the `browser-protocol` macro crate: the generator emits plain
 //! structs, and these derives add the builder, read-only getters and the

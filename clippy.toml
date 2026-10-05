@@ -1,7 +1,7 @@
-# Clippy configuration for the bidi-protocol workspace.
+# Clippy configuration for the webdriver-bidi workspace.
 
 # Minimum supported Rust version (matches the crates' `rust-version`).
-msrv = "1.85"
+msrv = "1.99"
 
 # Generated BiDi builders take every required field as a positional argument,
 # which routinely exceeds Clippy's default threshold of 7.

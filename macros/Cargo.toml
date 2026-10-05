@@ -1,12 +1,12 @@
 [package]
-name = "bidi-protocol-macros"
+name = "webdriver-bidi-macros"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.99.0"
 authors = ["AzzoDude"]
-description = "Derive macros for bidi-protocol (builder, command and event generation)"
+description = "Derive macros for webdriver-bidi (builder, command and event generation)"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/AzzoDude/bidi-protocol"
+repository = "https://github.com/AzzoDude/webdriver-bidi"
 keywords = ["webdriver", "bidi", "protocol", "macros"]
 categories = ["development-tools", "web-programming"]
 

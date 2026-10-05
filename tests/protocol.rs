@@ -1,6 +1,6 @@
 //! Round-trip checks for the generated BiDi protocol types.
 
-use bidi_protocol::{browsing_context, session, Command};
+use webdriver_bidi::{browsing_context, session, Command};
 
 #[test]
 fn builds_and_serializes_a_command_envelope() {
@@ -44,7 +44,7 @@ fn deserializes_a_session_new_result() {
             }
         }
     }"#;
-    let reply: bidi_protocol::SuccessResponse<session::NewResult> =
+    let reply: webdriver_bidi::SuccessResponse<session::NewResult> =
         serde_json::from_str(raw).unwrap();
     assert_eq!(reply.result.session_id, "s1");
     assert_eq!(reply.result.capabilities.browser_name, "firefox");

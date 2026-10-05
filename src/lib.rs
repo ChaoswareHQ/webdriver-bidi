@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
-pub use bidi_protocol_macros::{BidiBuilder, BidiCommand, BidiEvent};
+pub use webdriver_bidi_macros::{BidiBuilder, BidiCommand, BidiEvent};
 
 /// A typed BiDi command: pairs a wire `method` with its result type.
 pub trait BidiCommand: Serialize {

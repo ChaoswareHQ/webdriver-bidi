@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Publish the workspace crates to crates.io, skipping versions that already exist.
 
-Crates are published in dependency order (`bidi-protocol-macros` before
-`bidi-protocol`), and the script waits for crates.io to index each crate before
+Crates are published in dependency order (`webdriver-bidi-macros` before
+`webdriver-bidi`), and the script waits for crates.io to index each crate before
 publishing the next one. Skipping already-published versions makes the release
 workflow safe to re-run after a partial failure.
 
@@ -24,8 +24,8 @@ PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 
 # (crate name, Cargo.toml path) in publish order.
 CRATES = [
-    ("bidi-protocol-macros", os.path.join(PROJECT_ROOT, "macros", "Cargo.toml")),
-    ("bidi-protocol", os.path.join(PROJECT_ROOT, "Cargo.toml")),
+    ("webdriver-bidi-macros", os.path.join(PROJECT_ROOT, "macros", "Cargo.toml")),
+    ("webdriver-bidi", os.path.join(PROJECT_ROOT, "Cargo.toml")),
 ]
 
 INDEX_POLL_ATTEMPTS = 30
@@ -43,7 +43,7 @@ def package_version(cargo_toml: str) -> str:
 
 def version_exists(name: str, version: str) -> bool:
     url = f"https://crates.io/api/v1/crates/{name}/{version}"
-    request = urllib.request.Request(url, headers={"User-Agent": "bidi-protocol-release"})
+    request = urllib.request.Request(url, headers={"User-Agent": "webdriver-bidi-release"})
     try:
         with urllib.request.urlopen(request, timeout=30):
             return True

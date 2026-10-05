@@ -1,9 +1,12 @@
-# bidi-protocol
+# webdriver-bidi
 
 Generated Rust types for the [W3C WebDriver BiDi](https://w3c.github.io/webdriver-bidi/)
 protocol — the backend that lets Xcelerate drive **Firefox** (and every other
 browser that implements BiDi) the way `browser-protocol` / `js-protocol` let it
 drive Chromium over CDP.
+
+The `webdriver-bidi-macros` companion crate provides the `BidiBuilder`,
+`BidiCommand` and `BidiEvent` derives.
 
 ## Why this crate exists
 
@@ -68,25 +71,23 @@ The wire envelope (`Command`, `SuccessResponse`, `ErrorResponse`, `EmptyResult`,
 ## Usage
 
 ```rust
-use bidi_protocol::{BidiCommand, browsing_context};
+use webdriver_bidi::{Command, browsing_context};
 
-let params = browsing_context::NavigateParameters {
-    context: "abc".into(),
-    url: "https://example.com".into(),
-    wait: None,
-};
-let command = browsing_context::Navigate::command(1, &params);
-// browsing_context::Navigate::METHOD == "browsingContext.navigate"
+let params = browsing_context::NavigateParameters::builder("abc", "https://example.com")
+    .wait(browsing_context::ReadinessState::Complete)
+    .build();
+let command = Command::new(1, &params);
+// browsing_context::NavigateParameters::METHOD == "browsingContext.navigate"
 ```
 
 ## Publishing
 
-This crate is standalone (its own workspace; not a member of the Xcelerate
-workspace) and is published to crates.io independently:
+Standalone workspace (its own, not a member of the Xcelerate workspace). Both
+crates are published to crates.io independently, in dependency order:
 
 ```bash
-cargo publish --dry-run
-cargo publish
+python scripts/publish.py            # webdriver-bidi-macros, then webdriver-bidi
+python scripts/publish.py --dry-run
 ```
 
 ## Known gaps (first cut)
