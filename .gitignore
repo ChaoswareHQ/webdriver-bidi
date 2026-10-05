@@ -1,0 +1,37 @@
+### Rust ###
+debug/
+/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+### Generated / downloaded inputs ###
+# The full Bikeshed spec source (~550 KB) is downloaded on demand; the derived
+# all.cddl (the actual generation input) is committed instead.
+webdriver_bidi.bs
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+.history/
+*.vsix
+
+### VisualStudio ###
+.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.obj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
